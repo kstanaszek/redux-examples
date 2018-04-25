@@ -1,3 +1,5 @@
+import { Store } from './identity-reducer'
+
 interface Action {
     type: string
     payload?: any
@@ -15,38 +17,6 @@ interface UnsubscribeCallback{
     (): void;
 }
 
-class Store2<T> {
-    private _state: T;
-    private _action: Action = {type: 'INITIAL'};
-    private _listeners: ListenerCallback[] = [];
-
-    constructor(private reducer: Reducer<T>, initialState: T){
-        this._state = initialState;
-    }
-
-    getState(){
-        return this._state;
-    }
-
-    getActionType(){
-        return this._action.type;
-    }
-
-    subscribe(listener: ListenerCallback): UnsubscribeCallback {
-        this._listeners.push(listener);
-        return() => {
-            this._listeners = this._listeners.filter(l => l !== listener);
-        }
-    }
-
-    dispatch(action: Action): void {
-        this._action = action;
-        this._state = this.reducer(this._state, action)
-        this._listeners.forEach((listener: ListenerCallback) => listener());
-    }
-
-}
-
 
 interface AppState {
     messages: string[];
@@ -59,6 +29,22 @@ interface AddMessageAction extends Action {
 interface DeleteMessageAction extends Action {
     index: number;
 }
+
+class MessageActions {
+    static addMessage(message: string): AddMessageAction {
+        return {
+            type: 'ADD_MESSAGE',
+            message: message
+        }
+    };
+    static deleteMessage(index: number): DeleteMessageAction {
+        return {
+            type: 'DELETE_MESSAGE',
+            index: index
+        }
+    };
+}
+
 
 let myreducer: Reducer<AppState> = (state: AppState, action: Action): AppState => {
     switch(action.type) {
@@ -79,18 +65,12 @@ let myreducer: Reducer<AppState> = (state: AppState, action: Action): AppState =
     }
 }
 
-let mystore = new Store2<AppState>(myreducer, {messages: [] });
+let mystore = new Store<AppState>(myreducer, {messages: [] });
 
 
-mystore.dispatch({
-    type: 'ADD_MESSAGE',
-    message: 'Would you say the fringe was made of silk?'
-} as AddMessageAction)
-
-mystore.dispatch({
-    type: 'ADD_MESSAGE',
-    message: 'Wouldnt have no other kind but silk'
-} as AddMessageAction)
-
+mystore.dispatch(MessageActions.addMessage('Would you say the fringe was made of silk?'))
+mystore.dispatch(MessageActions.addMessage('Wouldnt have no other kind but silk'))
+mystore.dispatch(MessageActions.addMessage('Would you say the fringe was made of silk?'))
+mystore.dispatch(MessageActions.addMessage('Has it really got a team of snow white horses?'))
 
 console.log(mystore.getState());

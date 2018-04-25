@@ -15,7 +15,7 @@ interface UnsubscribeCallback{
     (): void;
 }
 
-class Store<T> {
+export class Store<T> {
     private _state: T;
     private _action: Action = {type: 'INITIAL'};
     private _listeners: ListenerCallback[] = [];
